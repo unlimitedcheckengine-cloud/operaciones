@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Taller Mecánico</title>
+    <!-- Incluye Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .scroll-container {
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .vehicle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast.success {
+            background-color: #10B981;
+        }
+        .toast.error {
+            background-color: #EF4444;
+        }
+        .toast.warning {
+            background-color: #F59E0B;
+        }
+        .status-bar-container {
+            background-color: #E5E7EB;
+            border-radius: 9999px;
+            height: 0.625rem;
+            overflow: hidden;
+        }
+        .status-bar {
+            background-color: #3B82F6;
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
+
+    <!-- Toast notifications -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Contenedor principal de la aplicación -->
+    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-10">
+        
+        <!-- Título de la aplicación y estado de conexión -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-blue-800 mb-2">
+                Sistema de Gestión de Taller
+            </h1>
+            <div id="loading-status" class="text-sm text-gray-500 mb-2">
+                <span class="inline-block h-4 w-4 rounded-full bg-green-500 mr-2"></span>
+                Sistema listo para usar
+            </div>
+            <p id="user-info" class="text-xs text-gray-400">Datos almacenados localmente</p>
+        </header>
+
+        <!-- Dashboard y Controles -->
+        <section id="dashboard-container" class="fade-in">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-2">Dashboard de Vehículos</h2>
+                    <p class="text-gray-600 text-sm">Selecciona un vehículo o crea uno nuevo.</p>
+                </div>
+                <button onclick="newVehicle()" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-green-700 transition-colors flex items-center mt-4 sm:mt-0">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Nuevo Vehículo
+                </button>
+            </div>
+            
+            <div id="vehicle-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Las tarjetas de vehículos se insertarán aquí dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Panel de Seguimiento y Formularios de Gestión -->
+        <section id="workflow-container" class="grid grid-cols-1 lg:grid-cols-3 gap-8 hidden">
+            
+            <!-- Panel de Seguimiento (Columna principal) -->
+            <div class="lg:col-span-2">
+                <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
+                    <h2 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-4">Panel de Seguimiento del Vehículo</h2>
+                    
+                    <div id="vehicle-details" class="bg-white p-6 rounded-xl shadow-md border border-blue-200 mb-6 hidden fade-in">
+                        <p class="text-lg font-bold text-gray-900 mb-2">
+                            <span id="display-placa"></span> |
+                            <span id="display-marca"></span> |
+                            <span id="display-modelo"></span>
+                        </p>
+                        <p class="text-gray-600">
+                            <span id="display-cliente"></span> | <span id="display-telefono"></span>
+                        </p>
+                        <p class="text-sm text-gray-500 mt-1">Recepción: <span id="display-hora-recepcion"></span></p>
+                    </div>
+
+                    <div id="status-display" class="relative overflow-hidden mb-6 hidden fade-in">
+                        <div class="flex items-center justify-between mb-2 text-sm sm:text-base font-medium">
+                            <span class="text-blue-600">Recepción</span>
+                            <span class="text-blue-600">Asignación</span>
+                            <span class="text-blue-600">Cotización</span>
+                            <span class="text-blue-600">Reparación</span>
+                            <span class="text-blue-600">Finalizado</span>
+                        </div>
+                        <div class="status-bar-container">
+                            <div id="status-bar" class="status-bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Panel de Alertas -->
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6 hidden" role="alert" id="alert-panel">
+                        <p class="font-bold">Alerta</p>
+                        <p id="alert-message"></p>
+                    </div>
+                    
+                    <!-- Sección para mostrar el estado actual y detalles -->
+                    <div id="current-status-card" class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500 hidden fade-in">
+                        <h3 class="text-lg font-semibold mb-2">Estado Actual: <span id="current-status" class="text-blue-600"></span></h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                            <div id="mechanic-info" class="hidden">
+                                <p><span class="font-medium">Mecánico Asignado:</span> <span id="display-mecanico"></span></p>
+                                <p><span class="font-medium">Trabajo a Realizar:</span> <span id="display-trabajo"></span></p>
+                                <p><span class="font-medium">Asignado el:</span> <span id="display-hora-asignacion"></span></p>
+                            </div>
+                            <div id="quote-info" class="hidden">
+                                <p><span class="font-medium">Cotización:</span> <span id="display-cotizacion"></span></p>
+                                <p><span class="font-medium">Monto:</span> <span id="display-monto"></span></p>
+                                <p><span class="font-medium">Cotizado el:</span> <span id="display-hora-cotizacion"></span></p>
+                            </div>
+                            <div id="parts-info" class="hidden">
+                                <p><span class="font-medium">Repuestos:</span> <span id="display-repuestos"></span></p>
+                                <p><span class="font-medium">Estatus Repuestos:</span> <span id="display-repuestos-status"></span></p>
+                            </div>
+                            <div id="completion-info" class="hidden">
+                                <p><span class="font-medium">Trabajo Concluido:</span> <span id="display-concluido"></span></p>
+                                <p><span class="font-medium">Observaciones:</span> <span id="display-observaciones"></span></p>
+                                <p><span class="font-medium">Finalizado el:</span> <span id="display-hora-finalizacion"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formularios de Gestión (Columna derecha) -->
+            <div class="space-y-8">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button onclick="showDashboard()" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-700 transition-colors flex-1">
+                        Volver al Dashboard
+                    </button>
+                    <button id="delete-vehicle-btn" onclick="deleteVehicle()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-red-700 transition-colors hidden">
+                        Eliminar
+                    </button>
+                </div>
+                
+                <!-- Fase 1: Recepción de Cliente -->
+                <div id="reception-form" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
+                    <h2 class="text-xl font-semibold mb-4 text-blue-700">1. Recepción de Cliente</h2>
+                    <form id="reception-data-form">
+                        <input type="text" id="placa" placeholder="Placa" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="text" id="marca" placeholder="Marca" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="text" id="modelo" placeholder="Modelo" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="text" id="color" placeholder="Color" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="text" id="cliente" placeholder="Nombre del Cliente" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="tel" id="telefono" placeholder="Teléfono" class="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                            <input type="date" id="reception-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <input type="time" id="reception-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Tiempo estimado (horas):</label>
+                            <input type="number" id="reception-eta" placeholder="Ej: 0.5" step="0.1" min="0" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Registrar Recepción</button>
+                    </form>
+                </div>
+
+                <!-- Fase 2: Asignación a Mecánico -->
+                <div id="assignment-form-container" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 hidden">
+                    <h2 class="text-xl font-semibold mb-4 text-blue-700">2. Asignación y Diagnóstico</h2>
+                    <form id="assignment-data-form">
+                        <input type="text" id="mecanico" placeholder="Nombre del Mecánico" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <textarea id="trabajo" placeholder="Trabajo a realizar (Ej: Chequeo general, mantenimiento, etc.)" rows="3" class="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                        <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                            <input type="date" id="assignment-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <input type="time" id="assignment-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Tiempo estimado (horas):</label>
+                            <input type="number" id="assignment-eta" placeholder="Ej: 2" step="0.1" min="0" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Asignar Trabajo</button>
+                    </form>
+                </div>
+
+                <!-- Fase 3: Cotización y Aprobación -->
+                <div id="quote-form-container" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 hidden">
+                    <h2 class="text-xl font-semibold mb-4 text-blue-700">3. Cotización y Aprobación del Cliente</h2>
+                    <form id="quote-data-form">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Monto de la Cotización:</label>
+                            <input type="number" id="monto-cotizacion" placeholder="Monto" step="0.01" min="0" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Aprobación del Cliente:</label>
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center"><input type="radio" name="aprobacion-status" value="Si" class="mr-1" checked> Sí</label>
+                                <label class="flex items-center"><input type="radio" name="aprobacion-status" value="No" class="mr-1"> No</label>
+                            </div>
+                        </div>
+                         <textarea id="razon-no-aplica" placeholder="Razón si no aplica" rows="2" class="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hidden"></textarea>
+                        <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                            <input type="date" id="quote-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <input type="time" id="quote-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Tiempo estimado (horas):</label>
+                            <input type="number" id="quote-eta" placeholder="Ej: 1" step="0.1" min="0" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Actualizar Cotización</button>
+                    </form>
+                </div>
+                
+                <!-- Fase 4: En Reparación -->
+                <div id="repair-form-container" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 hidden">
+                    <h2 class="text-xl font-semibold mb-4 text-blue-700">4. En Reparación</h2>
+                    <form id="repair-data-form">
+                        <textarea id="repuestos-info" placeholder="Repuestos solicitados y su estado" rows="3" class="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                         <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                            <input type="date" id="repair-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <input type="time" id="repair-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Tiempo estimado (horas):</label>
+                            <input type="number" id="repair-eta" placeholder="Ej: 5" step="0.1" min="0" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Iniciar Reparación</button>
+                    </form>
+                </div>
+
+                <!-- Fase 5: Conclusión del Trabajo -->
+                <div id="completion-form-container" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 hidden">
+                    <h2 class="text-xl font-semibold mb-4 text-blue-700">5. Conclusión y Entrega</h2>
+                    <form id="completion-form">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Trabajo Concluido:</label>
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center"><input type="radio" name="trabajo-concluido" value="Si" class="mr-1" checked> Sí</label>
+                                <label class="flex items-center"><input type="radio" name="trabajo-concluido" value="No" class="mr-1"> No</label>
+                            </div>
+                        </div>
+                        <textarea id="observaciones" placeholder="Observaciones detalladas" rows="4" class="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                            <input type="date" id="completion-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <input type="time" id="completion-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Tiempo estimado (horas):</label>
+                            <input type="number" id="completion-eta" placeholder="Ej: 5" step="0.1" min="0" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Finalizar y Entregar</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Variables globales
+        let vehicleDocs = [];
+        let activeVehicleDocId = null;
+        const STORAGE_KEY = 'taller-mecanico-data';
+
+        // DOM element references
+        const loadingStatus = document.getElementById('loading-status');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const workflowContainer = document.getElementById('workflow-container');
+        const vehicleList = document.getElementById('vehicle-list');
+        const alertPanel = document.getElementById('alert-panel');
+        const alertMessage = document.getElementById('alert-message');
+        const vehicleDetailsCard = document.getElementById('vehicle-details');
+        const currentStatusCard = document.getElementById('current-status-card');
+        const statusBar = document.getElementById('status-bar');
+        const currentStatusText = document.getElementById('current-status');
+        const mechanicInfo = document.getElementById('mechanic-info');
+        const quoteInfo = document.getElementById('quote-info');
+        const partsInfo = document.getElementById('parts-info');
+        const completionInfo = document.getElementById('completion-info');
+        const deleteVehicleBtn = document.getElementById('delete-vehicle-btn');
+        const toast = document.getElementById('toast');
+
+        // Function to show toast notifications
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.className = `toast ${type}`;
+            }, 3000);
+        }
+        
+        // Function to show a temporary alert message
+        function showAlert(message, type = 'warning') {
+            alertMessage.textContent = message;
+            alertPanel.classList.remove('hidden');
+            
+            // Change alert color based on type
+            if (type === 'error') {
+                alertPanel.className = 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-6';
+            } else if (type === 'success') {
+                alertPanel.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6';
+            } else {
+                alertPanel.className = 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6';
+            }
+            
+            setTimeout(() => {
+                alertPanel.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Function to save data to localStorage
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicleDocs));
+        }
+
+        // Function to load data from localStorage
+        function loadData() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
+                vehicleDocs = JSON.parse(data);
+            } else {
+                vehicleDocs = [];
+            }
+        }
+        
+        // Function to calculate and render the dashboard with the list of vehicles
+        function renderDashboard() {
+            vehicleList.innerHTML = '';
+            if (vehicleDocs.length === 0) {
+                vehicleList.innerHTML = `<p class="text-center col-span-full text-gray-500 py-8">
+                    No hay vehículos registrados. Haz clic en "Nuevo Vehículo" para empezar.
+                </p>`;
+                return;
+            }
+            
+            vehicleDocs.forEach(vehicle => {
+                const now = new Date();
+                let borderColor = 'border-blue-500';
+                let alertMessage = '';
+                
+                // Calculate elapsed time in hours since the last timestamp
+                let elapsedTimeHours = 0;
+                let estimatedHours = 0;
+                let currentPhaseTimestamp = null;
+                
+                if (vehicle.phase === 'asignacion' && vehicle.timestamps.recepcion) {
+                    currentPhaseTimestamp = new Date(vehicle.timestamps.recepcion);
+                    estimatedHours = vehicle.eta.reception || 0;
+                } else if (vehicle.phase === 'cotizacion' && vehicle.timestamps.asignacion) {
+                    currentPhaseTimestamp = new Date(vehicle.timestamps.asignacion);
+                    estimatedHours = vehicle.eta.assignment || 0;
+                } else if (vehicle.phase === 'reparacion' && vehicle.timestamps.cotizacion) {
+                    currentPhaseTimestamp = new Date(vehicle.timestamps.cotizacion);
+                    estimatedHours = vehicle.eta.quote || 0;
+                } else if (vehicle.phase === 'finalizado' && vehicle.timestamps.reparacion) {
+                    currentPhaseTimestamp = new Date(vehicle.timestamps.reparacion);
+                    estimatedHours = vehicle.eta.repair || 0;
+                } else if (vehicle.phase === 'finalizado' && vehicle.timestamps.cotizacion) { // Case for skipped repair
+                    currentPhaseTimestamp = new Date(vehicle.timestamps.cotizacion);
+                    estimatedHours = vehicle.eta.completion || 0;
+                }
+                
+                if (currentPhaseTimestamp) {
+                    elapsedTimeHours = (now.getTime() - currentPhaseTimestamp.getTime()) / (1000 * 60 * 60);
+                }
+
+                // Logic for time-based alerts
+                if (estimatedHours > 0) {
+                    if (elapsedTimeHours >= estimatedHours * 1.5) { // 150% of estimated time
+                        borderColor = 'border-red-500';
+                        alertMessage = '¡Retraso Crítico!';
+                    } else if (elapsedTimeHours >= estimatedHours) { // 100% of estimated time
+                        borderColor = 'border-yellow-500';
+                        alertMessage = 'Tiempo estimado excedido';
+                    } else if (elapsedTimeHours >= estimatedHours * 0.75) { // 75% of estimated time
+                        borderColor = 'border-yellow-300';
+                        alertMessage = 'A punto de exceder el tiempo';
+                    }
+                }
+
+                if (vehicle.isComplete) {
+                    borderColor = 'border-green-500';
+                    alertMessage = 'Trabajo Concluido';
+                }
+
+                const card = document.createElement('div');
+                card.className = `vehicle-card bg-white p-6 rounded-xl shadow-lg border-l-4 ${borderColor} cursor-pointer transition-transform duration-200 relative`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-xl font-semibold">${vehicle.placa}</p>
+                        <span class="text-xs text-gray-400">${new Date(vehicle.timestamps.recepcion).toLocaleDateString()}</span>
+                    </div>
+                    <p class="text-gray-700">${vehicle.cliente}</p>
+                    <p class="text-sm text-gray-500 mt-2">Estado: <span class="font-medium text-blue-600">${vehicle.status}</span></p>
+                    ${alertMessage ? `<span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full shadow-md ${borderColor.includes('red') ? 'bg-red-500 text-white' : borderColor.includes('yellow') ? 'bg-yellow-400 text-gray-800' : 'bg-green-500 text-white'}">${alertMessage}</span>` : ''}
+                `;
+                card.addEventListener('click', () => selectVehicle(vehicle.id));
+                vehicleList.appendChild(card);
+            });
+            dashboardContainer.classList.remove('hidden');
+            workflowContainer.classList.add('hidden');
+            deleteVehicleBtn.classList.add('hidden');
+        }
+
+        // Function to select a vehicle and show its tracking panel
+        function selectVehicle(docId) {
+            activeVehicleDocId = docId;
+            dashboardContainer.classList.add('hidden');
+            workflowContainer.classList.remove('hidden');
+            deleteVehicleBtn.classList.remove('hidden');
+            renderPanel();
+            updateForms();
+        }
+
+        // Function to return to the dashboard
+        function showDashboard() {
+            activeVehicleDocId = null;
+            renderDashboard();
+        }
+
+        // Function to start a new vehicle entry
+        function newVehicle() {
+            activeVehicleDocId = 'new';
+            dashboardContainer.classList.add('hidden');
+            workflowContainer.classList.remove('hidden');
+            deleteVehicleBtn.classList.add('hidden');
+            resetForms();
+            resetPanel();
+            updateForms();
+            const now = new Date();
+            const date = now.toISOString().substring(0, 10);
+            const time = now.toTimeString().substring(0, 5);
+            document.getElementById('reception-date').value = date;
+            document.getElementById('reception-time').value = time;
+        }
+
+        // Function to update the tracking panel based on the current state
+        function renderPanel() {
+            if (!activeVehicleDocId || activeVehicleDocId === 'new') {
+                resetPanel();
+                return;
+            }
+            
+            const currentVehicle = vehicleDocs.find(v => v.id === activeVehicleDocId);
+            if (!currentVehicle) {
+                showDashboard();
+                return;
+            }
+
+            let progress = 0;
+            switch (currentVehicle.phase) {
+                case 'recepcion': progress = 5; break;
+                case 'asignacion': progress = 25; break;
+                case 'cotizacion': progress = 50; break;
+                case 'reparacion': progress = 75; break;
+                case 'finalizado': progress = 100; break;
+            }
+            statusBar.style.width = `${progress}%`;
+            currentStatusText.textContent = currentVehicle.status;
+
+            document.getElementById('display-placa').textContent = `${currentVehicle.placa || ''}`;
+            document.getElementById('display-marca').textContent = `${currentVehicle.marca || ''}`;
+            document.getElementById('display-modelo').textContent = `${currentVehicle.modelo || ''}`;
+            document.getElementById('display-cliente').textContent = `${currentVehicle.cliente || ''}`;
+            document.getElementById('display-telefono').textContent = `${currentVehicle.telefono || ''}`;
+            document.getElementById('display-hora-recepcion').textContent = new Date(currentVehicle.timestamps.recepcion).toLocaleString();
+            vehicleDetailsCard.classList.remove('hidden');
+            currentStatusCard.classList.remove('hidden');
+            document.getElementById('status-display').classList.remove('hidden');
+            
+            if (currentVehicle.mecanico) {
+                document.getElementById('display-mecanico').textContent = currentVehicle.mecanico;
+                document.getElementById('display-trabajo').textContent = currentVehicle.trabajo;
+                document.getElementById('display-hora-asignacion').textContent = currentVehicle.timestamps.asignacion ? new Date(currentVehicle.timestamps.asignacion).toLocaleString() : 'N/A';
+                mechanicInfo.classList.remove('hidden');
+            } else {
+                mechanicInfo.classList.add('hidden');
+            }
+
+            if (currentVehicle.cotizacion) {
+                document.getElementById('display-cotizacion').textContent = currentVehicle.cotizacion.status;
+                document.getElementById('display-monto').textContent = currentVehicle.cotizacion.monto ? `RD$${currentVehicle.cotizacion.monto}` : currentVehicle.cotizacion.reason || 'N/A';
+                document.getElementById('display-hora-cotizacion').textContent = currentVehicle.timestamps.cotizacion ? new Date(currentVehicle.timestamps.cotizacion).toLocaleString() : 'N/A';
+                quoteInfo.classList.remove('hidden');
+            } else {
+                quoteInfo.classList.add('hidden');
+            }
+            
+            if (currentVehicle.repuestos) {
+                document.getElementById('display-repuestos').textContent = currentVehicle.repuestos.info || 'N/A';
+                document.getElementById('display-repuestos-status').textContent = currentVehicle.repuestos.orderStatus || 'N/A';
+                partsInfo.classList.remove('hidden');
+            } else {
+                partsInfo.classList.add('hidden');
+            }
+            
+            if (currentVehicle.isComplete) {
+                document.getElementById('display-concluido').textContent = currentVehicle.isComplete ? 'Sí' : 'No';
+                document.getElementById('display-observaciones').textContent = currentVehicle.observaciones || 'No hay observaciones.';
+                document.getElementById('display-hora-finalizacion').textContent = currentVehicle.timestamps.finalizacion ? new Date(currentVehicle.timestamps.finalizacion).toLocaleString() : 'N/A';
+                completionInfo.classList.remove('hidden');
+            } else {
+                completionInfo.classList.add('hidden');
+            }
+        }
+        
+        // Reset the tracking panel
+        function resetPanel() {
+            document.getElementById('placa').value = '';
+            document.getElementById('marca').value = '';
+            document.getElementById('modelo').value = '';
+            document.getElementById('color').value = '';
+            document.getElementById('cliente').value = '';
+            document.getElementById('telefono').value = '';
+            vehicleDetailsCard.classList.add('hidden');
+            currentStatusCard.classList.add('hidden');
+            statusBar.style.width = '0%';
+        }
+        
+        // Reset all form inputs
+        function resetForms() {
+            document.getElementById('reception-data-form').reset();
+            document.getElementById('assignment-data-form').reset();
+            document.getElementById('quote-data-form').reset();
+            document.getElementById('repair-data-form').reset();
+            document.getElementById('completion-form').reset();
+        }
+
+        // Hide/show forms based on the current workflow phase
+        function updateForms() {
+            if (!activeVehicleDocId) return;
+
+            if (activeVehicleDocId === 'new') {
+                document.getElementById('reception-form').classList.remove('hidden');
+                document.getElementById('assignment-form-container').classList.add('hidden');
+                document.getElementById('quote-form-container').classList.add('hidden');
+                document.getElementById('repair-form-container').classList.add('hidden');
+                document.getElementById('completion-form-container').classList.add('hidden');
+            } else {
+                const currentVehicle = vehicleDocs.find(v => v.id === activeVehicleDocId);
+                if (!currentVehicle) return;
+
+                document.getElementById('reception-form').classList.toggle('hidden', currentVehicle.phase !== 'recepcion');
+                document.getElementById('assignment-form-container').classList.toggle('hidden', currentVehicle.phase !== 'asignacion');
+                document.getElementById('quote-form-container').classList.toggle('hidden', currentVehicle.phase !== 'cotizacion');
+                document.getElementById('repair-form-container').classList.toggle('hidden', currentVehicle.phase !== 'reparacion');
+                document.getElementById('completion-form-container').classList.toggle('hidden', currentVehicle.phase !== 'finalizado');
+
+                if (currentVehicle.phase === 'asignacion' && currentVehicle.timestamps.recepcion) {
+                    const date = new Date(currentVehicle.timestamps.recepcion);
+                    document.getElementById('assignment-date').value = date.toISOString().substring(0, 10);
+                    document.getElementById('assignment-time').value = date.toTimeString().substring(0, 5);
+                }
+                 if (currentVehicle.phase === 'cotizacion' && currentVehicle.timestamps.asignacion) {
+                    const date = new Date(currentVehicle.timestamps.asignacion);
+                    document.getElementById('quote-date').value = date.toISOString().substring(0, 10);
+                    document.getElementById('quote-time').value = date.toTimeString().substring(0, 5);
+                }
+                if (currentVehicle.phase === 'reparacion' && currentVehicle.timestamps.cotizacion) {
+                    const date = new Date(currentVehicle.timestamps.cotizacion);
+                    document.getElementById('repair-date').value = date.toISOString().substring(0, 10);
+                    document.getElementById('repair-time').value = date.toTimeString().substring(0, 5);
+                }
+                if (currentVehicle.phase === 'finalizado' && (currentVehicle.timestamps.reparacion || currentVehicle.timestamps.cotizacion)) {
+                    const date = new Date(currentVehicle.timestamps.reparacion || currentVehicle.timestamps.cotizacion);
+                    document.getElementById('completion-date').value = date.toISOString().substring(0, 10);
+                    document.getElementById('completion-time').value = date.toTimeString().substring(0, 5);
+                }
+            }
+        }
+
+        // Handle the vehicle reception
+        document.getElementById('reception-data-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const placa = document.getElementById('placa').value;
+
+            // Check if vehicle already exists
+            if (vehicleDocs.some(v => v.placa === placa)) {
+                showAlert(`El vehículo con placa "${placa}" ya está registrado. Por favor, selecciónalo del dashboard para continuar.`, 'error');
+                return;
+            }
+
+            const receptionDate = document.getElementById('reception-date').value;
+            const receptionTime = document.getElementById('reception-time').value;
+            const receptionTimestamp = new Date(`${receptionDate}T${receptionTime}:00`).toISOString();
+            const receptionEta = document.getElementById('reception-eta').value ? parseFloat(document.getElementById('reception-eta').value) : 0;
+
+            const vehicleData = {
+                id: Date.now().toString(),
+                placa: placa,
+                marca: document.getElementById('marca').value,
+                modelo: document.getElementById('modelo').value,
+                color: document.getElementById('color').value,
+                cliente: document.getElementById('cliente').value,
+                telefono: document.getElementById('telefono').value,
+                timestamps: { recepcion: receptionTimestamp },
+                eta: { reception: receptionEta },
+                phase: 'asignacion',
+                status: 'Asignación a Mecánico',
+                alerts: {},
+                isComplete: false,
+            };
+            
+            try {
+                vehicleDocs.push(vehicleData);
+                saveData();
+                activeVehicleDocId = vehicleData.id;
+                showToast('Vehículo registrado exitosamente.');
+                showDashboard();
+            } catch (error) {
+                console.error("Error al registrar el vehículo:", error);
+                showAlert('Error al registrar el vehículo. Por favor, intenta de nuevo.', 'error');
+            }
+        });
+
+        // Handle mechanic assignment
+        document.getElementById('assignment-data-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const assignmentDate = document.getElementById('assignment-date').value;
+            const assignmentTime = document.getElementById('assignment-time').value;
+            const assignmentTimestamp = new Date(`${assignmentDate}T${assignmentTime}:00`).toISOString();
+            const assignmentEta = document.getElementById('assignment-eta').value ? parseFloat(document.getElementById('assignment-eta').value) : 0;
+
+            const currentVehicleIndex = vehicleDocs.findIndex(v => v.id === activeVehicleDocId);
+            if (currentVehicleIndex === -1) return;
+
+            vehicleDocs[currentVehicleIndex] = {
+                ...vehicleDocs[currentVehicleIndex],
+                mecanico: document.getElementById('mecanico').value,
+                trabajo: document.getElementById('trabajo').value,
+                timestamps: { ...vehicleDocs[currentVehicleIndex].timestamps, asignacion: assignmentTimestamp },
+                eta: { ...vehicleDocs[currentVehicleIndex].eta, assignment: assignmentEta },
+                phase: 'cotizacion',
+                status: 'En Proceso / Esperando Cotización'
+            };
+            
+            saveData();
+            showToast('Trabajo asignado. Esperando cotización.');
+            renderPanel();
+            updateForms();
+        });
+
+        // Handle quote and parts management
+        document.getElementById('quote-data-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const aprobacionStatus = document.querySelector('input[name="aprobacion-status"]:checked').value;
+            
+            const quoteDate = document.getElementById('quote-date').value;
+            const quoteTime = document.getElementById('quote-time').value;
+            const quoteTimestamp = new Date(`${quoteDate}T${quoteTime}:00`).toISOString();
+            const quoteEta = document.getElementById('quote-eta').value ? parseFloat(document.getElementById('quote-eta').value) : 0;
+
+            const currentVehicleIndex = vehicleDocs.findIndex(v => v.id === activeVehicleDocId);
+            if (currentVehicleIndex === -1) return;
+            
+            const updateData = {
+                cotizacion: {
+                    status: aprobacionStatus,
+                    monto: document.getElementById('monto-cotizacion').value,
+                    reason: aprobacionStatus === 'No' ? document.getElementById('razon-no-aplica').value : null,
+                },
+                timestamps: { ...vehicleDocs[currentVehicleIndex].timestamps, cotizacion: quoteTimestamp },
+                eta: { ...vehicleDocs[currentVehicleIndex].eta, quote: quoteEta },
+            };
+
+            if (aprobacionStatus === 'Si') {
+                updateData.phase = 'reparacion';
+                updateData.status = 'Reparación en curso';
+            } else {
+                updateData.phase = 'finalizado';
+                updateData.status = 'Cotización rechazada. Listo para entrega.';
+            }
+
+            vehicleDocs[currentVehicleIndex] = {
+                ...vehicleDocs[currentVehicleIndex],
+                ...updateData
+            };
+            
+            saveData();
+            showToast(aprobacionStatus === 'Si' 
+                ? 'Cotización aprobada. El vehículo pasa a reparación.' 
+                : 'Cotización rechazada. El vehículo pasa directamente a entrega.');
+            renderPanel();
+            updateForms();
+        });
+        
+        // Handle repair process
+        document.getElementById('repair-data-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const repairDate = document.getElementById('repair-date').value;
+            const repairTime = document.getElementById('repair-time').value;
+            const repairTimestamp = new Date(`${repairDate}T${repairTime}:00`).toISOString();
+            const repairEta = document.getElementById('repair-eta').value ? parseFloat(document.getElementById('repair-eta').value) : 0;
+
+            const currentVehicleIndex = vehicleDocs.findIndex(v => v.id === activeVehicleDocId);
+            if (currentVehicleIndex === -1) return;
+
+            vehicleDocs[currentVehicleIndex] = {
+                ...vehicleDocs[currentVehicleIndex],
+                repuestos: {
+                    info: document.getElementById('repuestos-info').value
+                },
+                timestamps: { ...vehicleDocs[currentVehicleIndex].timestamps, reparacion: repairTimestamp },
+                eta: { ...vehicleDocs[currentVehicleIndex].eta, repair: repairEta },
+                phase: 'finalizado',
+                status: 'Reparación concluida. Listo para entrega.'
+            };
+            
+            saveData();
+            showToast('Reparación concluida, el vehículo está listo para entrega.');
+            renderPanel();
+            updateForms();
+        });
+
+        // Handle job completion
+        document.getElementById('completion-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const trabajoConcluido = document.querySelector('input[name="trabajo-concluido"]:checked').value;
+            
+            const completionDate = document.getElementById('completion-date').value;
+            const completionTime = document.getElementById('completion-time').value;
+            const completionTimestamp = new Date(`${completionDate}T${completionTime}:00`).toISOString();
+            const completionEta = document.getElementById('completion-eta').value ? parseFloat(document.getElementById('completion-eta').value) : 0;
+            
+            const currentVehicleIndex = vehicleDocs.findIndex(v => v.id === activeVehicleDocId);
+            if (currentVehicleIndex === -1) return;
+
+            vehicleDocs[currentVehicleIndex] = {
+                ...vehicleDocs[currentVehicleIndex],
+                isComplete: trabajoConcluido === 'Si',
+                observaciones: document.getElementById('observaciones').value,
+                timestamps: { ...vehicleDocs[currentVehicleIndex].timestamps, finalizacion: completionTimestamp },
+                eta: { ...vehicleDocs[currentVehicleIndex].eta, completion: completionEta },
+                status: 'Trabajo Concluido. Listo para Entrega.',
+            };
+            
+            saveData();
+            showToast('Trabajo finalizado y listo para la entrega del vehículo.');
+            renderPanel();
+            updateForms();
+        });
+
+        // Function to delete a vehicle
+        function deleteVehicle() {
+            if (!confirm('¿Estás seguro de que deseas eliminar este vehículo? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            try {
+                vehicleDocs = vehicleDocs.filter(v => v.id !== activeVehicleDocId);
+                saveData();
+                showToast('Vehículo eliminado exitosamente.');
+                showDashboard();
+            } catch (error) {
+                console.error("Error al eliminar el vehículo:", error);
+                showAlert('Error al eliminar el vehículo. Por favor, intenta de nuevo.', 'error');
+            }
+        }
+
+        // Toggle reason field based on approval status
+        document.querySelectorAll('input[name="aprobacion-status"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const reasonField = document.getElementById('razon-no-aplica');
+                if (e.target.value === 'No') {
+                    reasonField.classList.remove('hidden');
+                    reasonField.setAttribute('required', 'true');
+                } else {
+                    reasonField.classList.add('hidden');
+                    reasonField.removeAttribute('required');
+                }
+            });
+        });
+
+        // Initialize application
+        function initApp() {
+            loadData();
+            renderDashboard();
+            
+            // Set current date and time for new forms
+            const now = new Date();
+            const date = now.toISOString().substring(0, 10);
+            const time = now.toTimeString().substring(0, 5);
+            
+            document.getElementById('reception-date').value = date;
+            document.getElementById('reception-time').value = time;
+            document.getElementById('assignment-date').value = date;
+            document.getElementById('assignment-time').value = time;
+            document.getElementById('quote-date').value = date;
+            document.getElementById('quote-time').value = time;
+            document.getElementById('repair-date').value = date;
+            document.getElementById('repair-time').value = time;
+            document.getElementById('completion-date').value = date;
+            document.getElementById('completion-time').value = time;
+        }
+
+        // Make functions available globally
+        window.selectVehicle = selectVehicle;
+        window.showDashboard = showDashboard;
+        window.newVehicle = newVehicle;
+        window.deleteVehicle = deleteVehicle;
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+
+</body>
+</html>
