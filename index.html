@@ -3,847 +3,1388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHECKENGINERD OPERACIÓN</title>
-    <!-- Incluye Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>CheckEngineRD Unlimited - Sistema de Citas</title>
+    <!-- Importación de Bootstrap CSS y Font Awesome para íconos -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
         }
-        .scroll-container {
-            max-height: 50vh;
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .logo {
+            max-width: 180px;
+            height: auto;
+        }
+        
+        .navbar-custom {
+            background-color: var(--primary-color);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--secondary-color);
+        }
+        
+        .card-header-custom {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary-custom {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-primary-custom:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        
+        .stat-card {
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .table-responsive {
+            max-height: 500px;
             overflow-y: auto;
         }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
+        
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.5rem;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .finanzas-icon {
+            font-size: 1.2rem;
+            margin-right: 5px;
+            vertical-align: middle;
         }
-        .vehicle-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        
+        .badge {
+            font-size: 0.85em;
         }
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 8px;
-            color: white;
-            z-index: 1000;
-            opacity: 0;
-            transform: translateX(100%);
+        
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .table th {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            z-index: 10;
+        }
+        
+        .btn-copiar {
+            position: absolute;
+            right: 15px;
+            top: -45px;
+        }
+        
+        .modal-backdrop {
+            z-index: 1040 !important;
+        }
+        
+        .modal {
+            z-index: 1050 !important;
+        }
+        
+        .tooltip-inner {
+            max-width: 350px;
+        }
+        
+        /* Estilos para el modal de agentes */
+        .agente-item {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .agente-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* Nuevos estilos para la interfaz mejorada */
+        .dashboard-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
+            border: none;
         }
-        .toast.show {
-            opacity: 1;
-            transform: translateX(0);
+        
+        .dashboard-card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
-        .toast.success {
-            background-color: #10B981;
+        
+        .summary-widget {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
         }
-        .toast.error {
-            background-color: #EF4444;
+        
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: bold;
         }
-        .toast.warning {
-            background-color: #F59E0B;
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
         }
-        .status-bar-container {
-            background-color: #E5E7EB;
-            border-radius: 9999px;
-            height: 0.625rem;
+        
+        .main-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .welcome-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .config-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .welcome-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .summary-value {
+                font-size: 1.5rem;
+            }
+        }
+        
+        .logo-preview {
+            max-width: 200px;
+            max-height: 100px;
+            margin-top: 10px;
+            border: 1px dashed #ccc;
+            padding: 5px;
+        }
+
+        .fc-event-dragging {
+            opacity: 0.7;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* --- Estilos para el cupón --- */
+        .cupon-container {
+            background-color: #f4f7f9; /* Un gris muy claro */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 0;
+            border-radius: 15px;
             overflow: hidden;
         }
-        .status-bar {
-            background-color: #3B82F6;
+        .cupon-banner {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .cupon-banner img {
+            max-height: 50px;
+            filter: brightness(0) invert(1); /* Logo en blanco */
+            margin-bottom: 10px;
+        }
+        .cupon-banner h3 {
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        .cupon-body {
+            padding: 20px;
+        }
+        .cupon-island {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .cupon-island h6 {
+            color: var(--primary-color);
+            font-weight: bold;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .cupon-island p {
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+        .cupon-island strong {
+            color: #333;
+        }
+        .cupon-offer {
+            border: 2px dashed var(--success-color);
+            text-align: center;
+        }
+        .cupon-footer {
+            padding: 15px 20px;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cupon-footer-text {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        .precio-original {
+            text-decoration: line-through;
+            color: #aaa;
+            font-size: 1.2rem;
+        }
+        .precio-promocional {
+            color: var(--success-color);
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+        .precio-cortesia {
+            color: var(--secondary-color);
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .cupon-qr {
+            text-align: right;
+        }
+        .cupon-qr img {
+            max-width: 80px;
+            border: 4px solid white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* --- Estilos para el nuevo diseño del calendario --- */
+        .fc-event-main-custom {
+            padding: 2px 4px;
+            font-size: 0.8em;
+            overflow: hidden;
             height: 100%;
-            border-radius: 9999px;
-            transition: width 0.5s ease-in-out;
+        }
+        .fc-event-title-container {
+            margin-left: 5px;
+        }
+        .fc-event-title-custom {
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .fc-event-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .fc-daygrid-event .fc-event-main-custom {
+            display: flex;
+            align-items: center;
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
-
-    <!-- Toast notifications -->
-    <div id="toast" class="toast hidden"></div>
-
-    <!-- Contenedor principal de la aplicación -->
-    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-10">
-        
-        <!-- Título de la aplicación y estado de conexión -->
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-blue-800 mb-2">
-                Sistema de Gestión de Taller
-            </h1>
-            <div id="loading-status" class="text-sm text-gray-500 mb-2">
-                <span class="inline-block h-4 w-4 rounded-full bg-green-500 mr-2"></span>
-                Sistema listo para usar
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img id="headerLogo" src="https://placehold.co/180x50/ffffff/3498db?text=CheckEngineRD" alt="Checkenginerd Unlimited" class="logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#configuracionModal"><i class="fas fa-cog me-1"></i> Configuración</a>
+                    </li>
+                </ul>
             </div>
-            <p id="user-info" class="text-xs text-gray-400">Datos almacenados localmente</p>
-        </header>
+        </div>
+    </nav>
 
-        <!-- Dashboard y Controles -->
-        <section id="dashboard-container" class="fade-in">
-            <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
-                <div>
-                    <h2 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-2">Dashboard de Vehículos</h2>
-                    <p class="text-gray-600 text-sm">Selecciona un vehículo o crea uno nuevo.</p>
+    <div class="container mt-4">
+        <div class="welcome-header text-center">
+            <h1><i class="fas fa-calendar-check me-2"></i> <span id="headerEmpresaNombre">CheckEngineRD Unlimited</span></h1>
+            <p class="lead">Sistema de Gestión de Citas</p>
+        </div>
+
+        <!-- Mensaje de confirmación o error -->
+        <div id="mensajeContainer" class="position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1050; display: none;">
+            <div id="mensajeAlerta" class="alert fade show" role="alert"></div>
+        </div>
+
+        <!-- Panel de resumen -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="summary-widget text-center">
+                    <div class="summary-value" id="resumenTotal">0</div>
+                    <div>Total Citas</div>
                 </div>
-                <button onclick="newVehicle()" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-green-700 transition-colors flex items-center mt-4 sm:mt-0">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Nuevo Vehículo
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="summary-widget text-center">
+                    <div class="summary-value" id="resumenHoy">0</div>
+                    <div>Citas Hoy</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="summary-widget text-center">
+                    <div class="summary-value" id="resumenPendientes">0</div>
+                    <div>Pendientes</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="summary-widget text-center">
+                    <div class="summary-value" id="resumenFacturado">$0</div>
+                    <div>Facturado</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación por pestañas -->
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="pills-inicio-tab" data-bs-toggle="pill" data-bs-target="#pills-inicio" type="button" role="tab" aria-controls="pills-inicio" aria-selected="true">
+                    <i class="fas fa-tachometer-alt me-1"></i> Inicio
                 </button>
-            </div>
-            
-            <div id="vehicle-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Las tarjetas de vehículos se insertarán aquí dinámicamente -->
-            </div>
-        </section>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="pills-citas-tab" data-bs-toggle="pill" data-bs-target="#pills-citas" type="button" role="tab" aria-controls="pills-citas" aria-selected="false">
+                    <i class="fas fa-list me-1"></i> Gestionar Citas
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="pills-nueva-tab" data-bs-toggle="pill" data-bs-target="#pills-nueva" type="button" role="tab" aria-controls="pills-nueva" aria-selected="false" onclick="limpiarFormularioNuevaCita()">
+                    <i class="fas fa-plus-circle me-1"></i> Nueva Cita
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="pills-reportes-tab" data-bs-toggle="pill" data-bs-target="#pills-reportes" type="button" role="tab" aria-controls="pills-reportes" aria-selected="false" onclick="generarReportes()">
+                    <i class="fas fa-chart-bar me-1"></i> Reportes
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="pills-agentes-tab" data-bs-toggle="pill" data-bs-target="#pills-agentes" type="button" role="tab" aria-controls="pills-agentes" aria-selected="false">
+                    <i class="fas fa-users me-1"></i> Agentes
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="pills-calendario-tab" data-bs-toggle="pill" data-bs-target="#pills-calendario" type="button" role="tab" aria-controls="pills-calendario" aria-selected="false">
+                    <i class="fas fa-calendar-alt me-1"></i> Vista de Calendario
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="pills-clientes-tab" data-bs-toggle="pill" data-bs-target="#pills-clientes" type="button" role="tab" aria-controls="pills-clientes" aria-selected="false">
+                    <i class="fas fa-id-card me-1"></i> Clientes
+                </button>
+            </li>
+        </ul>
 
-        <!-- Panel de Seguimiento y Formularios de Gestión -->
-        <section id="workflow-container" class="grid grid-cols-1 lg:grid-cols-3 gap-8 hidden">
-            
-            <!-- Panel de Seguimiento (Columna principal) -->
-            <div class="lg:col-span-2">
-                <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
-                    <h2 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-4">Panel de Seguimiento del Vehículo</h2>
-                    
-                    <div id="vehicle-details" class="bg-white p-6 rounded-xl shadow-md border border-blue-200 mb-6 hidden fade-in">
-                        <p class="text-lg font-bold text-gray-900 mb-2">
-                            <span id="display-placa"></span> |
-                            <span id="display-marca"></span> |
-                            <span id="display-modelo"></span>
-                        </p>
-                        <p class="text-gray-600">
-                            <span id="display-cliente"></span> | <span id="display-telefono"></span>
-                        </p>
-                        <p class="text-sm text-gray-500 mt-1">Recepción: <span id="display-hora-recepcion"></span></p>
-                    </div>
-
-                    <div id="status-display" class="relative overflow-hidden mb-6 hidden fade-in">
-                        <div class="flex items-center justify-between mb-2 text-sm sm:text-base font-medium">
-                            <span class="text-blue-600">Recepción</span>
-                            <span class="text-blue-600">Asignación</span>
-                            <span class="text-blue-600">Cotización</span>
-                            <span class="text-blue-600">Reparación</span>
-                            <span class="text-blue-600">Finalizado</span>
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content" id="pills-tabContent">
+            <!-- Pestaña de Inicio (Dashboard) -->
+            <div class="tab-pane fade show active" id="pills-inicio" role="tabpanel" aria-labelledby="pills-inicio-tab">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- Próximas Citas -->
+                        <div class="card dashboard-card mb-4">
+                            <div class="card-header card-header-custom">
+                                <h5 class="mb-0"><i class="fas fa-hourglass-half me-2"></i>Próximas Citas Pendientes</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush" id="proximasCitasContainer">
+                                    <!-- Las próximas citas se cargarán aquí -->
+                                </ul>
+                            </div>
                         </div>
-                        <div class="status-bar-container">
-                            <div id="status-bar" class="status-bar" style="width: 0%;"></div>
+                        <!-- Actividad Reciente -->
+                        <div class="card dashboard-card mb-4">
+                            <div class="card-header card-header-custom">
+                                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Actividad Reciente</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush" id="actividadRecienteContainer">
+                                    <!-- La actividad reciente se cargará aquí -->
+                                </ul>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Panel de Alertas -->
-                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6 hidden" role="alert" id="alert-panel">
-                        <p class="font-bold">Alerta</p>
-                        <p id="alert-message"></p>
-                    </div>
-                    
-                    <!-- Sección para mostrar el estado actual y detalles -->
-                    <div id="current-status-card" class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500 hidden fade-in">
-                        <h3 class="text-lg font-semibold mb-2">Estado Actual: <span id="current-status" class="text-blue-600"></span></h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                            <div id="mechanic-info" class="hidden">
-                                <p><span class="font-medium">Mecánico Asignado:</span> <span id="display-mecanico"></span></p>
-                                <p><span class="font-medium">Trabajo a Realizar:</span> <span id="display-trabajo"></span></p>
-                                <p><span class="font-medium">Asignado el:</span> <span id="display-hora-asignacion"></span></p>
+                    <div class="col-lg-4">
+                        <!-- Acciones Rápidas -->
+                        <div class="card dashboard-card">
+                            <div class="card-header card-header-custom">
+                                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Acciones Rápidas</h5>
                             </div>
-                            <div id="quote-info" class="hidden">
-                                <p><span class="font-medium">Cotización:</span> <span id="display-cotizacion"></span></p>
-                                <p><span class="font-medium">Monto:</span> <span id="display-monto"></span></p>
-                                <p><span class="font-medium">Cotizado el:</span> <span id="display-hora-cotizacion"></span></p>
-                            </div>
-                            <div id="parts-info" class="hidden">
-                                <p><span class="font-medium">Repuestos:</span> <span id="display-repuestos"></span></p>
-                                <p><span class="font-medium">Estatus Repuestos:</span> <span id="display-repuestos-status"></span></p>
-                            </div>
-                            <div id="completion-info" class="hidden">
-                                <p><span class="font-medium">Trabajo Concluido:</span> <span id="display-concluido"></span></p>
-                                <p><span class="font-medium">Observaciones:</span> <span id="display-observaciones"></span></p>
-                                <p><span class="font-medium">Finalizado el:</span> <span id="display-hora-finalizacion"></span></p>
+                            <div class="card-body">
+                                <button class="btn btn-primary-custom w-100 mb-2" onclick="document.getElementById('pills-nueva-tab').click()"><i class="fas fa-plus-circle me-2"></i>Nueva Cita</button>
+                                <button class="btn btn-info w-100 text-white" onclick="document.getElementById('pills-calendario-tab').click()"><i class="fas fa-calendar-alt me-2"></i>Ver Calendario</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Formularios de Gestión (Columna derecha) -->
-            <div class="space-y-8">
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <button onclick="showDashboard()" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-700 transition-colors flex-1">
-                        Volver al Dashboard
-                    </button>
-                    <button id="delete-vehicle-btn" onclick="deleteVehicle()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-red-700 transition-colors hidden">
-                        Eliminar
-                    </button>
+            <!-- Pestaña de Gestión de Citas -->
+            <div class="tab-pane fade" id="pills-citas" role="tabpanel" aria-labelledby="pills-citas-tab">
+                <!-- Sección de Filtros, Estadísticas, Exportar y Guardar -->
+                <div class="row mb-3" id="filtros">
+                    <div class="col-md-12">
+                        <div class="card dashboard-card">
+                            <div class="card-header card-header-custom">
+                                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros y Acciones</h5>
+                            </div>
+                            <div class="card-body py-2 d-flex flex-wrap justify-content-between align-items-center">
+                                <div id="grupo-filtros" class="btn-group btn-group-sm mb-2 mb-md-0 me-md-2" role="group" aria-label="Filtros por estado de cita">
+                                    <button type="button" class="btn btn-outline-primary active" data-estado="todas">Todas</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-estado="pendiente">Pendientes</button>
+                                    <button type="button" class="btn btn-outline-info" data-estado="recibido">Recibidos</button>
+                                    <button type="button" class="btn btn-outline-success" data-estado="completada">Completadas</button>
+                                    <button type="button" class="btn btn-outline-warning" data-estado="reagendada">Reagendadas</button>
+                                    <button type="button" class="btn btn-outline-danger" data-estado="no_asistio">No Asistieron</button>
+                                    <button type="button" class="btn btn-outline-dark" data-estado="cancelada">Canceladas</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de Estadísticas y Filtro Diario y Mensual -->
+                <div class="card dashboard-card mb-4">
+                    <div class="card-header card-header-custom">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Estadísticas y Filtros Avanzados</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3 align-items-end">
+                            <div class="col-lg-4 col-md-12 mb-2 mb-lg-0">
+                                <label for="filtroBusqueda" class="form-label">Buscar por texto:</label>
+                                <input type="text" class="form-control" id="filtroBusqueda" placeholder="Nombre, teléfono, vehículo...">
+                            </div>
+                            <div class="col-lg-2 col-md-3 mb-2 mb-md-0">
+                                <label for="filtroFecha" class="form-label">Por Día:</label>
+                                <input type="date" class="form-control" id="filtroFecha">
+                            </div>
+                            <div class="col-lg-2 col-md-3 mb-2 mb-md-0">
+                                <label for="filtroMes" class="form-label">Por Mes:</label>
+                                <select class="form-select" id="filtroMes">
+                                    <option value="">Todos los meses</option>
+                                    <option value="01">Enero</option>
+                                    <option value="02">Febrero</option>                                    
+                                    <option value="03">Marzo</option>
+                                    <option value="04">Abril</option>
+                                    <option value="05">Mayo</option>
+                                    <option value="06">Junio</option>
+                                    <option value="07">Julio</option>
+                                    <option value="08">Agosto</option>
+                                    <option value="09">Septiembre</option>                                    
+                                    <option value="10">Octubre</option>
+                                    <option value="11">Noviembre</option>
+                                    <option value="12">Diciembre</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-3 mb-2 mb-md-0">
+                                <label for="filtroAnio" class="form-label">Por Año:</label>
+                                <select class="form-select" id="filtroAnio">
+                                    <option value="">Todos los años</option>
+                                    <!-- Los años se cargarán dinámicamente -->
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-3">
+                                <div class="form-check form-switch mt-md-4">
+                                    <input class="form-check-input" type="checkbox" id="filtroFacturado">
+                                    <label class="form-check-label" for="filtroFacturado">Solo facturados</label>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row text-center" id="estadisticasDiarias">
+                            <div class="col-md-3 mb-2">
+                                <div class="card h-100 stat-card">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-muted">Total de Citas</h6>
+                                        <p class="stat-value text-primary" id="statsTotal">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="card h-100 stat-card">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-muted">Recibidas</h6>
+                                        <p class="stat-value text-info" id="statsRecibidas">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="card h-100 stat-card">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-muted">Monto Facturado</h6>
+                                        <p class="stat-value text-success" id="statsMonto">$0.00 RD</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="card h-100 stat-card">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-muted">Efectividad</h6>
+                                        <p class="stat-value text-dark" id="statsEfectividad">0%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Fase 1: Recepción de Cliente -->
-                <div id="reception-form" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
-                    <h2 class="text-xl font-semibold mb-4 text-blue-700">1. Recepción de Cliente</h2>
-                    <form id="reception-data-form">
-                        <input type="text" id="placa" placeholder="Placa" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <input type="text" id="marca" placeholder="Marca" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <input type="text" id="modelo" placeholder="Modelo" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <input type="text" id="color" placeholder="Color" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <input type="text" id="cliente" placeholder="Nombre del Cliente" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <input type="tel" id="telefono" placeholder="Teléfono" class="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                            <input type="date" id="reception-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <input type="time" id="reception-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <!-- Tarjeta para citas programadas y tabla -->
+                <div class="card dashboard-card mb-4 position-relative">
+                    <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Citas Programadas</h5>
+                        <button id="btnCopiarLista" class="btn btn-sm btn-light" title="Copiar lista de citas">
+                            <i class="fas fa-copy me-1"></i>Copiar Lista
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha/Hora</th>
+                                        <th>Cliente</th>
+                                        <th>Marca</th>
+                                        <th>Modelo</th>
+                                        <th>Año</th>
+                                        <th>Agente</th>
+                                        <th>Estado</th>
+                                        <th>Finanzas</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaCitas">
+                                    <!-- Las citas se cargarán aquí dinámicamente con JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Tiempo estimado (horas):</label>
-                            <input type="number" id="reception-eta" placeholder="Ej: 0.5" step="0.1" min="0" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Registrar Recepción</button>
-                    </form>
-                </div>
-
-                <!-- Fase 2: Asignación a Mecánico -->
-                <div id="assignment-form-container" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 hidden">
-                    <h2 class="text-xl font-semibold mb-4 text-blue-700">2. Asignación y Diagnóstico</h2>
-                    <form id="assignment-data-form">
-                        <input type="text" id="mecanico" placeholder="Nombre del Mecánico" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <textarea id="trabajo" placeholder="Trabajo a realizar (Ej: Chequeo general, mantenimiento, etc.)" rows="3" class="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
-                        <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                            <input type="date" id="assignment-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <input type="time" id="assignment-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Tiempo estimado (horas):</label>
-                            <input type="number" id="assignment-eta" placeholder="Ej: 2" step="0.1" min="0" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Asignar Trabajo</button>
-                    </form>
-                </div>
-
-                <!-- Fase 3: Cotización y Aprobación -->
-                <div id="quote-form-container" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 hidden">
-                    <h2 class="text-xl font-semibold mb-4 text-blue-700">3. Cotización y Aprobación del Cliente</h2>
-                    <form id="quote-data-form">
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Monto de la Cotización:</label>
-                            <input type="number" id="monto-cotizacion" placeholder="Monto" step="0.01" min="0" class="w-full mb-3 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Aprobación del Cliente:</label>
-                            <div class="flex items-center space-x-4">
-                                <label class="flex items-center"><input type="radio" name="aprobacion-status" value="Si" class="mr-1" checked> Sí</label>
-                                <label class="flex items-center"><input type="radio" name="aprobacion-status" value="No" class="mr-1"> No</label>
-                            </div>
-                        </div>
-                         <textarea id="razon-no-aplica" placeholder="Razón si no aplica" rows="2" class="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hidden"></textarea>
-                        <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                            <input type="date" id="quote-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <input type="time" id="quote-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Tiempo estimado (horas):</label>
-                            <input type="number" id="quote-eta" placeholder="Ej: 1" step="0.1" min="0" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Actualizar Cotización</button>
-                    </form>
-                </div>
-                
-                <!-- Fase 4: En Reparación -->
-                <div id="repair-form-container" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 hidden">
-                    <h2 class="text-xl font-semibold mb-4 text-blue-700">4. En Reparación</h2>
-                    <form id="repair-data-form">
-                        <textarea id="repuestos-info" placeholder="Repuestos solicitados y su estado" rows="3" class="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                         <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                            <input type="date" id="repair-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <input type="time" id="repair-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Tiempo estimado (horas):</label>
-                            <input type="number" id="repair-eta" placeholder="Ej: 5" step="0.1" min="0" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Iniciar Reparación</button>
-                    </form>
-                </div>
-
-                <!-- Fase 5: Conclusión del Trabajo -->
-                <div id="completion-form-container" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 hidden">
-                    <h2 class="text-xl font-semibold mb-4 text-blue-700">5. Conclusión y Entrega</h2>
-                    <form id="completion-form">
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Trabajo Concluido:</label>
-                            <div class="flex items-center space-x-4">
-                                <label class="flex items-center"><input type="radio" name="trabajo-concluido" value="Si" class="mr-1" checked> Sí</label>
-                                <label class="flex items-center"><input type="radio" name="trabajo-concluido" value="No" class="mr-1"> No</label>
-                            </div>
-                        </div>
-                        <textarea id="observaciones" placeholder="Observaciones detalladas" rows="4" class="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                        <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                            <input type="date" id="completion-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <input type="time" id="completion-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Tiempo estimado (horas):</label>
-                            <input type="number" id="completion-eta" placeholder="Ej: 5" step="0.1" min="0" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Finalizar y Entregar</button>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </section>
+
+            <!-- Pestaña de Nueva Cita -->
+            <div class="tab-pane fade" id="pills-nueva" role="tabpanel" aria-labelledby="pills-nueva-tab">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <!-- Tarjeta para crear nueva cita -->
+                        <div class="card dashboard-card">
+                            <div class="card-header card-header-custom">
+                                <h5 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Nueva Cita</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="citaForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="nombreCliente" class="form-label">Nombre del Cliente*</label>
+                                            <input type="text" class="form-control" id="nombreCliente" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="telefono" class="form-label">Teléfono*</label>
+                                            <input type="tel" class="form-control" id="telefono" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="marca" class="form-label">Marca*</label>
+                                            <input type="text" class="form-control" id="marca" required>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="modelo" class="form-label">Modelo*</label>
+                                            <input type="text" class="form-control" id="modelo" required>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="anio" class="form-label">Año*</label>
+                                            <input type="number" class="form-control" id="anio" min="1900" max="2099" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="fecha" class="form-label">Fecha de Servicio*</label>
+                                            <input type="date" class="form-control" id="fecha" required min="${new Date().toISOString().split('T')[0]}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="hora" class="form-label">Hora de Servicio*</label>
+                                            <select class="form-select" id="hora" required>
+                                                <option value="08:00">8:00 AM</option>
+                                                <option value="09:00">9:00 AM</option>
+                                                <option value="10:00">10:00 AM</option>
+                                                <option value="11:00">11:00 AM</option>
+                                                <option value="12:00">12:00 PM</option>
+                                                <option value="13:00">1:00 PM</option>
+                                                <option value="14:00">2:00 PM</option>
+                                                <option value="15:00">3:00 PM</option>
+                                                <option value="16:00">4:00 PM</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="servicio" class="form-label">Tipo de Servicio*</label>
+                                        <select class="form-select" id="servicio" required>
+                                            <option value="">Seleccione un servicio...</option>
+                                            <option value="Chequeo General">Chequeo General</option>
+                                            <option value="Chequeo libre de costo">Chequeo libre de costo</option>
+                                            <option value="Mantenimiento Inyección">Mantenimiento Inyección</option>
+                                            <option value="Cambio de Aceite">Cambio de Aceite</option>
+                                            <option value="Diagnóstico Computarizado">Diagnóstico Computarizado</option>
+                                            <option value="Trabajo a Realizar">Trabajo a Realizar</option>
+                                            <option value="Otro">Otro</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3" id="otroServicioContainer" style="display: none;">
+                                        <label for="otroServicio" class="form-label">Especificar Servicio</label>
+                                        <input type="text" class="form-control" id="otroServicio">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="notas" class="form-label">Notas Adicionales</label>
+                                        <textarea class="form-control" id="notas" rows="3" placeholder="Describa cualquier problema o detalle adicional..."></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="esPromocion">
+                                            <label class="form-check-label" for="esPromocion">Activar Promoción</label>
+                                        </div>
+                                    </div>
+                                    <div id="promoContainer" class="row" style="display: none;">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="precioRegular" class="form-label">Precio Regular</label>
+                                            <input type="number" class="form-control" id="precioRegular" placeholder="Ej: 1500">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="precioPromocional" class="form-label">Precio Promocional</label>
+                                            <input type="number" class="form-control" id="precioPromocional" placeholder="Ej: 995">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="agente" class="form-label">Agente de Ventas</label>
+                                        <div class="input-group">
+                                            <select class="form-select" id="agente" required>
+                                                <option value="">Seleccione un agente...</option>
+                                                <!-- Los agentes se cargarán dinámicamente -->
+                                            </select>
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#gestionAgentesModal">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                                        <i class="fas fa-save me-2"></i>Programar Cita
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña de Reportes -->
+            <div class="tab-pane fade" id="pills-reportes" role="tabpanel" aria-labelledby="pills-reportes-tab">
+                <!-- Sección de Filtros para Reportes -->
+                <div class="card dashboard-card mb-4">
+                    <div class="card-header card-header-custom">
+                        <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros para Reportes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3 align-items-end">
+                            <div class="col-md-3 mb-3">
+                                <label for="filtroReporteFechaInicio" class="form-label">Fecha Inicio:</label>
+                                <input type="date" class="form-control" id="filtroReporteFechaInicio">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="filtroReporteFechaFin" class="form-label">Fecha Fin:</label>
+                                <input type="date" class="form-control" id="filtroReporteFechaFin">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="filtroReporteAgente" class="form-label">Agente:</label>
+                                <select class="form-select" id="filtroReporteAgente">
+                                    <option value="">Todos los agentes</option>
+                                    <!-- Agentes se cargarán dinámicamente -->
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="filtroReporteServicio" class="form-label">Servicio:</label>
+                                <select class="form-select" id="filtroReporteServicio">
+                                    <option value="">Todos los servicios</option>
+                                    <!-- Servicios se cargarán dinámicamente -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-9">
+                                <label class="form-label">Estado de Cita:</label>
+                                <div id="grupo-filtros-reportes" class="btn-group btn-group-sm w-100" role="group" aria-label="Filtros por estado de cita en reportes">
+                                    <button type="button" class="btn btn-outline-primary active" data-estado="todas">Todas</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-estado="pendiente">Pendientes</button>
+                                    <button type="button" class="btn btn-outline-info" data-estado="recibido">Recibidos</button>
+                                    <button type="button" class="btn btn-outline-success" data-estado="completada">Completadas</button>
+                                    <button type="button" class="btn btn-outline-warning" data-estado="reagendada">Reagendadas</button>
+                                    <button type="button" class="btn btn-outline-danger" data-estado="no_asistio">No Asistieron</button>
+                                    <button type="button" class="btn btn-outline-dark" data-estado="cancelada">Canceladas</button>
+                                </div>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-center">
+                                <div class="form-check form-switch mt-3">
+                                    <input class="form-check-input" type="checkbox" id="filtroReporteFacturado">
+                                    <label class="form-check-label" for="filtroReporteFacturado">Solo facturados</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenido de Reportes (Gráficos y Tabla) -->
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-header card-header-custom">
+                                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Resumen por Estado</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="estadoChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-header card-header-custom">
+                                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Facturación Mensual</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="facturacionChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card dashboard-card">
+                    <div class="card-header card-header-custom">
+                        <h5 class="mb-0"><i class="fas fa-table me-2"></i>Reporte Detallado</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Agente</th>
+                                        <th>Citas Programadas</th>
+                                        <th>Citas Completadas</th>
+                                        <th>Monto Facturado</th>
+                                        <th>Efectividad</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaReportes">
+                                    <!-- Los reportes se generarán aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña de Gestión de Agentes -->
+            <div class="tab-pane fade" id="pills-agentes" role="tabpanel" aria-labelledby="pills-agentes-tab">
+                <div class="card dashboard-card">
+                    <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Gestión de Agentes</h5>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#gestionAgentesModal">
+                            <i class="fas fa-plus me-1"></i>Agregar Agente
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Teléfono</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaAgentes">
+                                    <!-- Los agentes se cargarán aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña de Calendario -->
+            <div class="tab-pane fade" id="pills-calendario" role="tabpanel" aria-labelledby="pills-calendario-tab">
+                <div class="card dashboard-card">
+                    <div class="card-header card-header-custom">
+                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Calendario de Citas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="calendario"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña de Clientes -->
+            <div class="tab-pane fade" id="pills-clientes" role="tabpanel" aria-labelledby="pills-clientes-tab">
+                <div class="row">
+                    <!-- Columna de Lista de Clientes -->
+                    <div class="col-md-4">
+                        <div class="card dashboard-card">
+                            <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Lista de Clientes</h5>
+                                <button class="btn btn-sm btn-light" id="btnNuevoCliente">
+                                    <i class="fas fa-plus me-1"></i>Nuevo
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <input type="text" id="filtroClientes" class="form-control" placeholder="Buscar cliente por nombre o teléfono...">
+                                </div>
+                                <div class="list-group" id="listaClientes" style="max-height: 600px; overflow-y: auto;">
+                                    <!-- Clientes se cargarán aquí -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Columna de Historial del Cliente -->
+                    <div class="col-md-8">
+                        <div id="historialClienteContainer" class="card dashboard-card" style="display: none;">
+                            <div class="card-header card-header-custom">
+                                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Historial de <span id="nombreClienteHistorial"></span></h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Teléfono:</strong> <span id="telefonoClienteHistorial"></span></p>
+                                <div id="tablaHistorialCliente" class="table-responsive" style="max-height: 550px;">
+                                    <!-- Historial se cargará aquí -->
+                                </div>
+                            </div>
+                        </div>
+                        <div id="placeholderCliente" class="text-center mt-5 pt-5">
+                            <i class="fas fa-id-card fa-4x text-muted"></i>
+                            <p class="mt-3 text-muted">Seleccione un cliente para ver su historial.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <script>
-        // Variables globales
-        let vehicleDocs = [];
-        let activeVehicleDocId = null;
-        const STORAGE_KEY = 'taller-mecanico-data';
-
-        // DOM element references
-        const loadingStatus = document.getElementById('loading-status');
-        const dashboardContainer = document.getElementById('dashboard-container');
-        const workflowContainer = document.getElementById('workflow-container');
-        const vehicleList = document.getElementById('vehicle-list');
-        const alertPanel = document.getElementById('alert-panel');
-        const alertMessage = document.getElementById('alert-message');
-        const vehicleDetailsCard = document.getElementById('vehicle-details');
-        const currentStatusCard = document.getElementById('current-status-card');
-        const statusBar = document.getElementById('status-bar');
-        const currentStatusText = document.getElementById('current-status');
-        const mechanicInfo = document.getElementById('mechanic-info');
-        const quoteInfo = document.getElementById('quote-info');
-        const partsInfo = document.getElementById('parts-info');
-        const completionInfo = document.getElementById('completion-info');
-        const deleteVehicleBtn = document.getElementById('delete-vehicle-btn');
-        const toast = document.getElementById('toast');
-
-        // Function to show toast notifications
-        function showToast(message, type = 'success') {
-            toast.textContent = message;
-            toast.className = `toast ${type} show`;
-            
-            setTimeout(() => {
-                toast.className = `toast ${type}`;
-            }, 3000);
-        }
-        
-        // Function to show a temporary alert message
-        function showAlert(message, type = 'warning') {
-            alertMessage.textContent = message;
-            alertPanel.classList.remove('hidden');
-            
-            // Change alert color based on type
-            if (type === 'error') {
-                alertPanel.className = 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-6';
-            } else if (type === 'success') {
-                alertPanel.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6';
-            } else {
-                alertPanel.className = 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6';
-            }
-            
-            setTimeout(() => {
-                alertPanel.classList.add('hidden');
-            }, 5000);
-        }
-
-        // Function to save data to localStorage
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicleDocs));
-        }
-
-        // Function to load data from localStorage
-        function loadData() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (data) {
-                vehicleDocs = JSON.parse(data);
-            } else {
-                vehicleDocs = [];
-            }
-        }
-        
-        // Function to calculate and render the dashboard with the list of vehicles
-        function renderDashboard() {
-            vehicleList.innerHTML = '';
-            if (vehicleDocs.length === 0) {
-                vehicleList.innerHTML = `<p class="text-center col-span-full text-gray-500 py-8">
-                    No hay vehículos registrados. Haz clic en "Nuevo Vehículo" para empezar.
-                </p>`;
-                return;
-            }
-            
-            vehicleDocs.forEach(vehicle => {
-                const now = new Date();
-                let borderColor = 'border-blue-500';
-                let alertMessage = '';
-                
-                // Calculate elapsed time in hours since the last timestamp
-                let elapsedTimeHours = 0;
-                let estimatedHours = 0;
-                let currentPhaseTimestamp = null;
-                
-                if (vehicle.phase === 'asignacion' && vehicle.timestamps.recepcion) {
-                    currentPhaseTimestamp = new Date(vehicle.timestamps.recepcion);
-                    estimatedHours = vehicle.eta.reception || 0;
-                } else if (vehicle.phase === 'cotizacion' && vehicle.timestamps.asignacion) {
-                    currentPhaseTimestamp = new Date(vehicle.timestamps.asignacion);
-                    estimatedHours = vehicle.eta.assignment || 0;
-                } else if (vehicle.phase === 'reparacion' && vehicle.timestamps.cotizacion) {
-                    currentPhaseTimestamp = new Date(vehicle.timestamps.cotizacion);
-                    estimatedHours = vehicle.eta.quote || 0;
-                } else if (vehicle.phase === 'finalizado' && vehicle.timestamps.reparacion) {
-                    currentPhaseTimestamp = new Date(vehicle.timestamps.reparacion);
-                    estimatedHours = vehicle.eta.repair || 0;
-                } else if (vehicle.phase === 'finalizado' && vehicle.timestamps.cotizacion) { // Case for skipped repair
-                    currentPhaseTimestamp = new Date(vehicle.timestamps.cotizacion);
-                    estimatedHours = vehicle.eta.completion || 0;
-                }
-                
-                if (currentPhaseTimestamp) {
-                    elapsedTimeHours = (now.getTime() - currentPhaseTimestamp.getTime()) / (1000 * 60 * 60);
-                }
-
-                // Logic for time-based alerts
-                if (estimatedHours > 0) {
-                    if (elapsedTimeHours >= estimatedHours * 1.5) { // 150% of estimated time
-                        borderColor = 'border-red-500';
-                        alertMessage = '¡Retraso Crítico!';
-                    } else if (elapsedTimeHours >= estimatedHours) { // 100% of estimated time
-                        borderColor = 'border-yellow-500';
-                        alertMessage = 'Tiempo estimado excedido';
-                    } else if (elapsedTimeHours >= estimatedHours * 0.75) { // 75% of estimated time
-                        borderColor = 'border-yellow-300';
-                        alertMessage = 'A punto de exceder el tiempo';
-                    }
-                }
-
-                if (vehicle.isComplete) {
-                    borderColor = 'border-green-500';
-                    alertMessage = 'Trabajo Concluido';
-                }
-
-                const card = document.createElement('div');
-                card.className = `vehicle-card bg-white p-6 rounded-xl shadow-lg border-l-4 ${borderColor} cursor-pointer transition-transform duration-200 relative`;
-                card.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <p class="text-xl font-semibold">${vehicle.placa}</p>
-                        <span class="text-xs text-gray-400">${new Date(vehicle.timestamps.recepcion).toLocaleDateString()}</span>
+    <!-- Modal para importar desde Excel -->
+    <div class="modal fade" id="importarExcelModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">Importar desde Excel/CSV</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="archivoExcel" class="form-label">Seleccionar archivo Excel/CSV</label>
+                        <input class="form-control" type="file" id="archivoExcel" accept=".xlsx,.xls,.csv">
                     </div>
-                    <p class="text-gray-700">${vehicle.cliente}</p>
-                    <p class="text-sm text-gray-500 mt-2">Estado: <span class="font-medium text-blue-600">${vehicle.status}</span></p>
-                    ${alertMessage ? `<span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full shadow-md ${borderColor.includes('red') ? 'bg-red-500 text-white' : borderColor.includes('yellow') ? 'bg-yellow-400 text-gray-800' : 'bg-green-500 text-white'}">${alertMessage}</span>` : ''}
-                `;
-                card.addEventListener('click', () => selectVehicle(vehicle.id));
-                vehicleList.appendChild(card);
-            });
-            dashboardContainer.classList.remove('hidden');
-            workflowContainer.classList.add('hidden');
-            deleteVehicleBtn.classList.add('hidden');
-        }
+                    <div class="mb-3">
+                        <label class="form-label">Opciones de importación</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="corregirFechas" checked>
+                            <label class="form-check-label" for="corregirFechas">
+                                Corregir formato de fechas automáticamente
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">Esta opción intentará detectar y corregir formatos de fecha incorrectos durante la importación.</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="form-label">Vista previa de datos</h6>
+                        <div class="import-preview table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Teléfono</th>
+                                        <th>Marca</th>
+                                        <th>Modelo</th>
+                                        <th>Año</th>
+                                        <th>Fecha</th>
+                                        <th>Hora</th>
+                                        <th>Servicio</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vistaPreviaDatos">
+                                    <tr>
+                                        <td colspan="9" class="text-center">No hay datos para mostrar</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="sobrescribirDatos">
+                        <label class="form-check-label" for="sobrescribirDatos">
+                            Sobrescribir datos existentes
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmarImportacion">Importar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Function to select a vehicle and show its tracking panel
-        function selectVehicle(docId) {
-            activeVehicleDocId = docId;
-            dashboardContainer.classList.add('hidden');
-            workflowContainer.classList.remove('hidden');
-            deleteVehicleBtn.classList.remove('hidden');
-            renderPanel();
-            updateForms();
-        }
+    <!-- Modal para seleccionar agente -->
+    <div class="modal fade" id="seleccionarAgenteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Seleccionar Agente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="filtroAgente" class="form-label">Filtrar agentes:</label>
+                        <input type="text" class="form-control" id="filtroAgente" placeholder="Buscar agente...">
+                    </div>
+                    <div class="list-group" id="listaAgentes">
+                        <!-- Lista de agentes se cargará aquí -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnSeleccionarAgente">Seleccionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Function to return to the dashboard
-        function showDashboard() {
-            activeVehicleDocId = null;
-            renderDashboard();
-        }
+    <!-- Modal para el cupón -->
+    <div class="modal fade" id="cuponModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Cupón de Servicio</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" id="cuponContent">
+                    <!-- Contenido del cupón se generará aquí -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="imprimirCupon()">
+                        <i class="fas fa-print me-1"></i>Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Function to start a new vehicle entry
-        function newVehicle() {
-            activeVehicleDocId = 'new';
-            dashboardContainer.classList.add('hidden');
-            workflowContainer.classList.remove('hidden');
-            deleteVehicleBtn.classList.add('hidden');
-            resetForms();
-            resetPanel();
-            updateForms();
-            const now = new Date();
-            const date = now.toISOString().substring(0, 10);
-            const time = now.toTimeString().substring(0, 5);
-            document.getElementById('reception-date').value = date;
-            document.getElementById('reception-time').value = time;
-        }
+    <!-- Modal para editar cita -->
+    <div class="modal fade" id="editarCitaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">Editar Cita</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editarCitaForm">
+                        <input type="hidden" id="editarId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editarNombreCliente" class="form-label">Nombre del Cliente*</label>
+                                <input type="text" class="form-control" id="editarNombreCliente" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editarTelefono" class="form-label">Teléfono*</label>
+                                <input type="tel" class="form-control" id="editarTelefono" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="editarMarca" class="form-label">Marca*</label>
+                                <input type="text" class="form-control" id="editarMarca" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="editarModelo" class="form-label">Modelo*</label>
+                                <input type="text" class="form-control" id="editarModelo" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="editarAnio" class="form-label">Año*</label>
+                                <input type="number" class="form-control" id="editarAnio" min="1900" max="2099" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editarFecha" class="form-label">Fecha de Servicio*</label>
+                                <input type="date" class="form-control" id="editarFecha" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editarHora" class="form-label">Hora de Servicio*</label>
+                                <select class="form-select" id="editarHora" required>
+                                    <option value="08:00">8:00 AM</option>
+                                    <option value="09:00">9:00 AM</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="12:00">12:00 PM</option>
+                                    <option value="13:00">1:00 PM</option>
+                                    <option value="14:00">2:00 PM</option>
+                                    <option value="15:00">3:00 PM</option>
+                                    <option value="16:00">4:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarServicio" class="form-label">Tipo de Servicio*</label>
+                            <select class="form-select" id="editarServicio" required>
+                                <option value="">Seleccione un servicio...</option>
+                                <option value="Chequeo General">Chequeo General</option>
+                                <option value="Chequeo libre de costo">Chequeo libre de costo</option>
+                                <option value="Mantenimiento Inyección">Mantenimiento Inyección</option>
+                                <option value="Cambio de Aceite">Cambio de Aceite</option>
+                                <option value="Diagnóstico Computarizado">Diagnóstico Computarizado</option>
+                                <option value="Trabajo a Realizar">Trabajo a Realizar</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="editarOtroServicioContainer" style="display: none;">
+                            <label for="editarOtroServicio" class="form-label">Especificar Servicio</label>
+                            <input type="text" class="form-control" id="editarOtroServicio">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarNotas" class="form-label">Notas Adicionales</label>
+                            <textarea class="form-control" id="editarNotas" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarAgente" class="form-label">Agente de Ventas</label>
+                            <select class="form-select" id="editarAgente">
+                                <option value="">Seleccione un agente...</option>
+                                <!-- Los agentes se cargarán dinámicamente -->
+                            </select>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="editarEsPromocion">
+                                <label class="form-check-label" for="editarEsPromocion">Activar Promoción</label>
+                            </div>
+                        </div>
+                        <div id="editarPromoContainer" class="row" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label for="editarPrecioRegular" class="form-label">Precio Regular</label>
+                                <input type="number" class="form-control" id="editarPrecioRegular" placeholder="Ej: 1500">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editarPrecioPromocional" class="form-label">Precio Promocional</label>
+                                <input type="number" class="form-control" id="editarPrecioPromocional" placeholder="Ej: 995">
+                            </div>
+                        </div>
+                        <hr>
+                        <h6 class="fw-bold">Datos Financieros y de Estado</h6>
+                        <div class="mb-3">
+                            <label for="editarEstado" class="form-label">Estado</label>
+                            <select class="form-select" id="editarEstado">
+                                <option value="pendiente">Pendiente</option>
+                                <option value="recibido">Recibido</option>
+                                <option value="completada">Completada</option>
+                                <option value="reagendada">Reagendada</option>
+                                <option value="no_asistio">No Asistió</option>
+                                <option value="cancelada">Cancelada</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input class="form-check-input" type="checkbox" id="editarFacturado">
+                            <label class="form-check-label" for="editarFacturado">
+                                ¿Facturado?
+                            </label>
+                        </div>
+                        <div class="mb-3" id="editarMontoContainer">
+                            <label for="editarMonto" class="form-label">Monto Facturado (<span id="simboloMoneda">$</span>)</label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="simboloMonedaInput">$</span>
+                                <input type="text" class="form-control" id="editarMonto" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarTieneCotizacion" class="form-label">¿Tiene Cotización?</label>
+                            <select class="form-select" id="editarTieneCotizacion">
+                                <option value="no_aplica">No aplica</option>
+                                <option value="si">Sí</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="editarMotivoCotizacionContainer" style="display: none;">
+                            <label for="editarMotivoCotizacion" class="form-label">Motivo de no tener cotización</label>
+                            <textarea class="form-control" id="editarMotivoCotizacion" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" id="btnGuardarEdicion">
+                        <i class="fas fa-save me-1"></i>Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Function to update the tracking panel based on the current state
-        function renderPanel() {
-            if (!activeVehicleDocId || activeVehicleDocId === 'new') {
-                resetPanel();
-                return;
-            }
-            
-            const currentVehicle = vehicleDocs.find(v => v.id === activeVehicleDocId);
-            if (!currentVehicle) {
-                showDashboard();
-                return;
-            }
+    <!-- Modal de confirmación para eliminar -->
+    <div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que quieres eliminar esta cita?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            let progress = 0;
-            switch (currentVehicle.phase) {
-                case 'recepcion': progress = 5; break;
-                case 'asignacion': progress = 25; break;
-                case 'cotizacion': progress = 50; break;
-                case 'reparacion': progress = 75; break;
-                case 'finalizado': progress = 100; break;
-            }
-            statusBar.style.width = `${progress}%`;
-            currentStatusText.textContent = currentVehicle.status;
+    <!-- Modal de Configuración -->
+    <div class="modal fade" id="configuracionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-cog me-2"></i>Configuración del Sistema</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="config-section">
+                        <h5 class="mb-3"><i class="fas fa-building me-2"></i>Datos de la Empresa</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="configNombreEmpresa" class="form-label">Nombre de la Empresa</label>
+                                <input type="text" class="form-control" id="configNombreEmpresa" value="CheckEngineRD Unlimited">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="configSucursal" class="form-label">Sucursal</label>
+                                <input type="text" class="form-control" id="configSucursal" value="Santo Domingo">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="configDireccion" class="form-label">Dirección</label>
+                                <input type="text" class="form-control" id="configDireccion" value="Av. de los Próceres 25, Santo Domingo">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="configTelefono" class="form-label">Teléfono</label>
+                                <input type="text" class="form-control" id="configTelefono" value="(809) 555-1234">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="configQrUrl" class="form-label">URL para Código QR (Opcional)</label>
+                            <input type="text" class="form-control" id="configQrUrl" placeholder="Ej: https://instagram.com/tu_taller">
+                        </div>
+                    </div>
 
-            document.getElementById('display-placa').textContent = `${currentVehicle.placa || ''}`;
-            document.getElementById('display-marca').textContent = `${currentVehicle.marca || ''}`;
-            document.getElementById('display-modelo').textContent = `${currentVehicle.modelo || ''}`;
-            document.getElementById('display-cliente').textContent = `${currentVehicle.cliente || ''}`;
-            document.getElementById('display-telefono').textContent = `${currentVehicle.telefono || ''}`;
-            document.getElementById('display-hora-recepcion').textContent = new Date(currentVehicle.timestamps.recepcion).toLocaleString();
-            vehicleDetailsCard.classList.remove('hidden');
-            currentStatusCard.classList.remove('hidden');
-            document.getElementById('status-display').classList.remove('hidden');
-            
-            if (currentVehicle.mecanico) {
-                document.getElementById('display-mecanico').textContent = currentVehicle.mecanico;
-                document.getElementById('display-trabajo').textContent = currentVehicle.trabajo;
-                document.getElementById('display-hora-asignacion').textContent = currentVehicle.timestamps.asignacion ? new Date(currentVehicle.timestamps.asignacion).toLocaleString() : 'N/A';
-                mechanicInfo.classList.remove('hidden');
-            } else {
-                mechanicInfo.classList.add('hidden');
-            }
+                    <div class="config-section">
+                        <h5 class="mb-3"><i class="fas fa-palette me-2"></i>Apariencia</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="configPrimaryColor" class="form-label">Color Primario (Banners, Encabezados)</label>
+                                <input type="color" class="form-control form-control-color" id="configPrimaryColor" value="#2c3e50">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="configSecondaryColor" class="form-label">Color Secundario (Botones, Énfasis)</label>
+                                <input type="color" class="form-control form-control-color" id="configSecondaryColor" value="#3498db">
+                            </div>
+                        </div>
+                    </div>
 
-            if (currentVehicle.cotizacion) {
-                document.getElementById('display-cotizacion').textContent = currentVehicle.cotizacion.status;
-                document.getElementById('display-monto').textContent = currentVehicle.cotizacion.monto ? `RD$${currentVehicle.cotizacion.monto}` : currentVehicle.cotizacion.reason || 'N/A';
-                document.getElementById('display-hora-cotizacion').textContent = currentVehicle.timestamps.cotizacion ? new Date(currentVehicle.timestamps.cotizacion).toLocaleString() : 'N/A';
-                quoteInfo.classList.remove('hidden');
-            } else {
-                quoteInfo.classList.add('hidden');
-            }
-            
-            if (currentVehicle.repuestos) {
-                document.getElementById('display-repuestos').textContent = currentVehicle.repuestos.info || 'N/A';
-                document.getElementById('display-repuestos-status').textContent = currentVehicle.repuestos.orderStatus || 'N/A';
-                partsInfo.classList.remove('hidden');
-            } else {
-                partsInfo.classList.add('hidden');
-            }
-            
-            if (currentVehicle.isComplete) {
-                document.getElementById('display-concluido').textContent = currentVehicle.isComplete ? 'Sí' : 'No';
-                document.getElementById('display-observaciones').textContent = currentVehicle.observaciones || 'No hay observaciones.';
-                document.getElementById('display-hora-finalizacion').textContent = currentVehicle.timestamps.finalizacion ? new Date(currentVehicle.timestamps.finalizacion).toLocaleString() : 'N/A';
-                completionInfo.classList.remove('hidden');
-            } else {
-                completionInfo.classList.add('hidden');
-            }
-        }
-        
-        // Reset the tracking panel
-        function resetPanel() {
-            document.getElementById('placa').value = '';
-            document.getElementById('marca').value = '';
-            document.getElementById('modelo').value = '';
-            document.getElementById('color').value = '';
-            document.getElementById('cliente').value = '';
-            document.getElementById('telefono').value = '';
-            vehicleDetailsCard.classList.add('hidden');
-            currentStatusCard.classList.add('hidden');
-            statusBar.style.width = '0%';
-        }
-        
-        // Reset all form inputs
-        function resetForms() {
-            document.getElementById('reception-data-form').reset();
-            document.getElementById('assignment-data-form').reset();
-            document.getElementById('quote-data-form').reset();
-            document.getElementById('repair-data-form').reset();
-            document.getElementById('completion-form').reset();
-        }
+                    <div class="config-section">
+                        <h5 class="mb-3"><i class="fas fa-image me-2"></i>Logo de la Empresa</h5>
+                        <div class="mb-3">
+                            <label for="configLogo" class="form-label">Seleccionar Logo</label>
+                            <input class="form-control" type="file" id="configLogo" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="form-label">Vista Previa</h6>
+                            <div>
+                                <img id="logoPreview" src="https://placehold.co/180x50/ffffff/3498db?text=CheckEngineRD" class="logo-preview" alt="Vista previa del logo">
+                            </div>
+                        </div>
+                    </div>
 
-        // Hide/show forms based on the current workflow phase
-        function updateForms() {
-            if (!activeVehicleDocId) return;
+                    <div class="config-section">
+                        <h5 class="mb-3"><i class="fas fa-database me-2"></i>Gestión de Datos y Respaldos</h5>
+                        <p class="text-muted">Guarda un respaldo completo del sistema o importa datos desde un archivo.</p>
+                        <div class="btn-group w-100" role="group">
+                            <button id="btnGuardarManual" class="btn btn-primary">
+                                <i class="fas fa-download me-1"></i> Guardar Respaldo
+                            </button>
+                            <label for="importarArchivo" class="btn btn-info mb-0">
+                                <i class="fas fa-upload me-1"></i> Importar Respaldo
+                            </label>
+                            <input type="file" id="importarArchivo" class="d-none" accept=".json">
+                        </div>
+                        <hr>
+                        <p class="text-muted">Exporta la lista de citas actual (con filtros aplicados) a un archivo de Excel/CSV o importa desde uno.</p>
+                        <div class="btn-group w-100" role="group">
+                             <button id="btnExportarExcel" class="btn btn-success">
+                                <i class="fas fa-file-excel me-1"></i> Exportar a Excel
+                            </button>
+                            <button id="btnImportarExcel" class="btn btn-warning">
+                                <i class="fas fa-file-import me-1"></i> Importar desde Excel
+                            </button>
+                        </div>
+                    </div>
 
-            if (activeVehicleDocId === 'new') {
-                document.getElementById('reception-form').classList.remove('hidden');
-                document.getElementById('assignment-form-container').classList.add('hidden');
-                document.getElementById('quote-form-container').classList.add('hidden');
-                document.getElementById('repair-form-container').classList.add('hidden');
-                document.getElementById('completion-form-container').classList.add('hidden');
-            } else {
-                const currentVehicle = vehicleDocs.find(v => v.id === activeVehicleDocId);
-                if (!currentVehicle) return;
+                    <div class="config-section">
+                        <h5 class="mb-3"><i class="fas fa-money-bill-wave me-2"></i>Configuración Monetaria</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="configMoneda" class="form-label">Moneda</label>
+                                <select class="form-select" id="configMoneda">
+                                    <option value="RD">Peso Dominicano (RD$)</option>
+                                    <option value="USD">Dólar Estadounidense (USD$)</option>
+                                    <option value="EUR">Euro (€)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="configFormatoMoneda" class="form-label">Formato de Moneda</label>
+                                <select class="form-select" id="configFormatoMoneda">
+                                    <option value="es-DO">Formato Dominicano (RD$ 1,000.00)</option>
+                                    <option value="en-US">Formato Estadounidense ($1,000.00)</option>
+                                    <option value="de-DE">Formato Europeo (1.000,00 €)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarConfiguracion">Guardar Configuración</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                document.getElementById('reception-form').classList.toggle('hidden', currentVehicle.phase !== 'recepcion');
-                document.getElementById('assignment-form-container').classList.toggle('hidden', currentVehicle.phase !== 'asignacion');
-                document.getElementById('quote-form-container').classList.toggle('hidden', currentVehicle.phase !== 'cotizacion');
-                document.getElementById('repair-form-container').classList.toggle('hidden', currentVehicle.phase !== 'reparacion');
-                document.getElementById('completion-form-container').classList.toggle('hidden', currentVehicle.phase !== 'finalizado');
+    <!-- Modal de Gestión de Agentes -->
+    <div class="modal fade" id="gestionAgentesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-users me-2"></i>Gestión de Agentes</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="agenteForm">
+                        <input type="hidden" id="agenteId">
+                        <div class="mb-3">
+                            <label for="agenteNombre" class="form-label">Nombre completo*</label>
+                            <input type="text" class="form-control" id="agenteNombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="agenteEmail" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="agenteEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="agenteTelefono" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="agenteTelefono">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="agenteActivo" checked>
+                            <label class="form-check-label" for="agenteActivo">Agente activo</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnEliminarAgente" style="display: none;">Eliminar</button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarAgente">Guardar Agente</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                if (currentVehicle.phase === 'asignacion' && currentVehicle.timestamps.recepcion) {
-                    const date = new Date(currentVehicle.timestamps.recepcion);
-                    document.getElementById('assignment-date').value = date.toISOString().substring(0, 10);
-                    document.getElementById('assignment-time').value = date.toTimeString().substring(0, 5);
-                }
-                 if (currentVehicle.phase === 'cotizacion' && currentVehicle.timestamps.asignacion) {
-                    const date = new Date(currentVehicle.timestamps.asignacion);
-                    document.getElementById('quote-date').value = date.toISOString().substring(0, 10);
-                    document.getElementById('quote-time').value = date.toTimeString().substring(0, 5);
-                }
-                if (currentVehicle.phase === 'reparacion' && currentVehicle.timestamps.cotizacion) {
-                    const date = new Date(currentVehicle.timestamps.cotizacion);
-                    document.getElementById('repair-date').value = date.toISOString().substring(0, 10);
-                    document.getElementById('repair-time').value = date.toTimeString().substring(0, 5);
-                }
-                if (currentVehicle.phase === 'finalizado' && (currentVehicle.timestamps.reparacion || currentVehicle.timestamps.cotizacion)) {
-                    const date = new Date(currentVehicle.timestamps.reparacion || currentVehicle.timestamps.cotizacion);
-                    document.getElementById('completion-date').value = date.toISOString().substring(0, 10);
-                    document.getElementById('completion-time').value = date.toTimeString().substring(0, 5);
-                }
-            }
-        }
+    <!-- Modal de Gestión de Clientes -->
+    <div class="modal fade" id="clienteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Gestión de Cliente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="clienteForm">
+                        <input type="hidden" id="clienteId">
+                        <div class="mb-3">
+                            <label for="clienteNombre" class="form-label">Nombre completo*</label>
+                            <input type="text" class="form-control" id="clienteNombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="clienteTelefono" class="form-label">Teléfono*</label>
+                            <input type="tel" class="form-control" id="clienteTelefono" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="clienteEmail" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="clienteEmail">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="btnGuardarCliente">Guardar Cliente</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Handle the vehicle reception
-        document.getElementById('reception-data-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const placa = document.getElementById('placa').value;
+    <!-- Scripts de Bootstrap y JavaScript personalizado -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Librerías adicionales -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FullCalendar JS y locale español -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/es.js"></script>
 
-            // Check if vehicle already exists
-            if (vehicleDocs.some(v => v.placa === placa)) {
-                showAlert(`El vehículo con placa "${placa}" ya está registrado. Por favor, selecciónalo del dashboard para continuar.`, 'error');
-                return;
-            }
-
-            const receptionDate = document.getElementById('reception-date').value;
-            const receptionTime = document.getElementById('reception-time').value;
-            const receptionTimestamp = new Date(`${receptionDate}T${receptionTime}:00`).toISOString();
-            const receptionEta = document.getElementById('reception-eta').value ? parseFloat(document.getElementById('reception-eta').value) : 0;
-
-            const vehicleData = {
-                id: Date.now().toString(),
-                placa: placa,
-                marca: document.getElementById('marca').value,
-                modelo: document.getElementById('modelo').value,
-                color: document.getElementById('color').value,
-                cliente: document.getElementById('cliente').value,
-                telefono: document.getElementById('telefono').value,
-                timestamps: { recepcion: receptionTimestamp },
-                eta: { reception: receptionEta },
-                phase: 'asignacion',
-                status: 'Asignación a Mecánico',
-                alerts: {},
-                isComplete: false,
-            };
-            
-            try {
-                vehicleDocs.push(vehicleData);
-                saveData();
-                activeVehicleDocId = vehicleData.id;
-                showToast('Vehículo registrado exitosamente.');
-                showDashboard();
-            } catch (error) {
-                console.error("Error al registrar el vehículo:", error);
-                showAlert('Error al registrar el vehículo. Por favor, intenta de nuevo.', 'error');
-            }
-        });
-
-        // Handle mechanic assignment
-        document.getElementById('assignment-data-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const assignmentDate = document.getElementById('assignment-date').value;
-            const assignmentTime = document.getElementById('assignment-time').value;
-            const assignmentTimestamp = new Date(`${assignmentDate}T${assignmentTime}:00`).toISOString();
-            const assignmentEta = document.getElementById('assignment-eta').value ? parseFloat(document.getElementById('assignment-eta').value) : 0;
-
-            const currentVehicleIndex = vehicleDocs.findIndex(v => v.id === activeVehicleDocId);
-            if (currentVehicleIndex === -1) return;
-
-            vehicleDocs[currentVehicleIndex] = {
-                ...vehicleDocs[currentVehicleIndex],
-                mecanico: document.getElementById('mecanico').value,
-                trabajo: document.getElementById('trabajo').value,
-                timestamps: { ...vehicleDocs[currentVehicleIndex].timestamps, asignacion: assignmentTimestamp },
-                eta: { ...vehicleDocs[currentVehicleIndex].eta, assignment: assignmentEta },
-                phase: 'cotizacion',
-                status: 'En Proceso / Esperando Cotización'
-            };
-            
-            saveData();
-            showToast('Trabajo asignado. Esperando cotización.');
-            renderPanel();
-            updateForms();
-        });
-
-        // Handle quote and parts management
-        document.getElementById('quote-data-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const aprobacionStatus = document.querySelector('input[name="aprobacion-status"]:checked').value;
-            
-            const quoteDate = document.getElementById('quote-date').value;
-            const quoteTime = document.getElementById('quote-time').value;
-            const quoteTimestamp = new Date(`${quoteDate}T${quoteTime}:00`).toISOString();
-            const quoteEta = document.getElementById('quote-eta').value ? parseFloat(document.getElementById('quote-eta').value) : 0;
-
-            const currentVehicleIndex = vehicleDocs.findIndex(v => v.id === activeVehicleDocId);
-            if (currentVehicleIndex === -1) return;
-            
-            const updateData = {
-                cotizacion: {
-                    status: aprobacionStatus,
-                    monto: document.getElementById('monto-cotizacion').value,
-                    reason: aprobacionStatus === 'No' ? document.getElementById('razon-no-aplica').value : null,
-                },
-                timestamps: { ...vehicleDocs[currentVehicleIndex].timestamps, cotizacion: quoteTimestamp },
-                eta: { ...vehicleDocs[currentVehicleIndex].eta, quote: quoteEta },
-            };
-
-            if (aprobacionStatus === 'Si') {
-                updateData.phase = 'reparacion';
-                updateData.status = 'Reparación en curso';
-            } else {
-                updateData.phase = 'finalizado';
-                updateData.status = 'Cotización rechazada. Listo para entrega.';
-            }
-
-            vehicleDocs[currentVehicleIndex] = {
-                ...vehicleDocs[currentVehicleIndex],
-                ...updateData
-            };
-            
-            saveData();
-            showToast(aprobacionStatus === 'Si' 
-                ? 'Cotización aprobada. El vehículo pasa a reparación.' 
-                : 'Cotización rechazada. El vehículo pasa directamente a entrega.');
-            renderPanel();
-            updateForms();
-        });
-        
-        // Handle repair process
-        document.getElementById('repair-data-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const repairDate = document.getElementById('repair-date').value;
-            const repairTime = document.getElementById('repair-time').value;
-            const repairTimestamp = new Date(`${repairDate}T${repairTime}:00`).toISOString();
-            const repairEta = document.getElementById('repair-eta').value ? parseFloat(document.getElementById('repair-eta').value) : 0;
-
-            const currentVehicleIndex = vehicleDocs.findIndex(v => v.id === activeVehicleDocId);
-            if (currentVehicleIndex === -1) return;
-
-            vehicleDocs[currentVehicleIndex] = {
-                ...vehicleDocs[currentVehicleIndex],
-                repuestos: {
-                    info: document.getElementById('repuestos-info').value
-                },
-                timestamps: { ...vehicleDocs[currentVehicleIndex].timestamps, reparacion: repairTimestamp },
-                eta: { ...vehicleDocs[currentVehicleIndex].eta, repair: repairEta },
-                phase: 'finalizado',
-                status: 'Reparación concluida. Listo para entrega.'
-            };
-            
-            saveData();
-            showToast('Reparación concluida, el vehículo está listo para entrega.');
-            renderPanel();
-            updateForms();
-        });
-
-        // Handle job completion
-        document.getElementById('completion-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const trabajoConcluido = document.querySelector('input[name="trabajo-concluido"]:checked').value;
-            
-            const completionDate = document.getElementById('completion-date').value;
-            const completionTime = document.getElementById('completion-time').value;
-            const completionTimestamp = new Date(`${completionDate}T${completionTime}:00`).toISOString();
-            const completionEta = document.getElementById('completion-eta').value ? parseFloat(document.getElementById('completion-eta').value) : 0;
-            
-            const currentVehicleIndex = vehicleDocs.findIndex(v => v.id === activeVehicleDocId);
-            if (currentVehicleIndex === -1) return;
-
-            vehicleDocs[currentVehicleIndex] = {
-                ...vehicleDocs[currentVehicleIndex],
-                isComplete: trabajoConcluido === 'Si',
-                observaciones: document.getElementById('observaciones').value,
-                timestamps: { ...vehicleDocs[currentVehicleIndex].timestamps, finalizacion: completionTimestamp },
-                eta: { ...vehicleDocs[currentVehicleIndex].eta, completion: completionEta },
-                status: 'Trabajo Concluido. Listo para Entrega.',
-            };
-            
-            saveData();
-            showToast('Trabajo finalizado y listo para la entrega del vehículo.');
-            renderPanel();
-            updateForms();
-        });
-
-        // Function to delete a vehicle
-        function deleteVehicle() {
-            if (!confirm('¿Estás seguro de que deseas eliminar este vehículo? Esta acción no se puede deshacer.')) {
-                return;
-            }
-            
-            try {
-                vehicleDocs = vehicleDocs.filter(v => v.id !== activeVehicleDocId);
-                saveData();
-                showToast('Vehículo eliminado exitosamente.');
-                showDashboard();
-            } catch (error) {
-                console.error("Error al eliminar el vehículo:", error);
-                showAlert('Error al eliminar el vehículo. Por favor, intenta de nuevo.', 'error');
-            }
-        }
-
-        // Toggle reason field based on approval status
-        document.querySelectorAll('input[name="aprobacion-status"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                const reasonField = document.getElementById('razon-no-aplica');
-                if (e.target.value === 'No') {
-                    reasonField.classList.remove('hidden');
-                    reasonField.setAttribute('required', 'true');
-                } else {
-                    reasonField.classList.add('hidden');
-                    reasonField.removeAttribute('required');
-                }
-            });
-        });
-
-        // Initialize application
-        function initApp() {
-            loadData();
-            renderDashboard();
-            
-            // Set current date and time for new forms
-            const now = new Date();
-            const date = now.toISOString().substring(0, 10);
-            const time = now.toTimeString().substring(0, 5);
-            
-            document.getElementById('reception-date').value = date;
-            document.getElementById('reception-time').value = time;
-            document.getElementById('assignment-date').value = date;
-            document.getElementById('assignment-time').value = time;
-            document.getElementById('quote-date').value = date;
-            document.getElementById('quote-time').value = time;
-            document.getElementById('repair-date').value = date;
-            document.getElementById('repair-time').value = time;
-            document.getElementById('completion-date').value = date;
-            document.getElementById('completion-time').value = time;
-        }
-
-        // Make functions available globally
-        window.selectVehicle = selectVehicle;
-        window.showDashboard = showDashboard;
-        window.newVehicle = newVehicle;
-        window.deleteVehicle = deleteVehicle;
-
-        // Initialize the application when the page loads
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
-
+    <script src="app.js"></script>
 </body>
 </html>
